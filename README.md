@@ -1,6 +1,7 @@
 <!-- PROJECT SHIELDS -->
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
+[![Blog][blog-shield]][blog-url]
 
 
 # GartnerEmailParser
@@ -43,3 +44,5 @@ you can find those at [The Bitly API](https://dev.bitly.com/docs/getting-started
 [license-url]: https://github.com/B1gG/GartnerEmailParser/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/LinkedIn-BigG-black.svg?style=for-the-badge&logo=linkedin&colorB=555&color=green
 [linkedin-url]: https://www.linkedin.com/in/gerardo-gonzalez-bigg
+[blog-shield]: https://img.shields.io/badge/blog-bigg.blog-black.svg?style=for-the-badge&logo=rss&colorB=555&color=green
+[blog-url]: https://bigg.blog
