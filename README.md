@@ -1,3 +1,6 @@
+<!-- PROJECT SHIELDS -->
+![GitHub](https://img.shields.io/github/license/b1gg/GartnerEmailParser)
+
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
@@ -35,3 +38,10 @@ It should be a json styled file with the following key/value:
 }
 ```
 you can find those at [The Bitly API](https://dev.bitly.com/docs/getting-started/introduction) site.
+
+<!-- MARKDOWN LINKS & IMAGES -->
+<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
+[license-shield]: https://img.shields.io/github/license/github_username/repo.svg?style=for-the-badge
+[license-url]: https://github.com/B1gG/GartnerEmailParser/blob/main/LICENSE
+[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
+[linkedin-url]: https://www.linkedin.com/in/gerardo-gonzalez-bigg
