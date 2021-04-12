@@ -1,3 +1,7 @@
+[![MIT License][license-shield]][license-url]
+[![LinkedIn][linkedin-shield]][linkedin-url]
+
+
 # GartnerEmailParser
 An script to parse the emails from gartnerwebinars@gartner.com
 
