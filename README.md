@@ -12,7 +12,7 @@ I use this script to extract the webinars details from the marketing email from 
 python3 GartnerEmailParser.py <url>
 ```
 
-The URL can be fount at the top of the email you receive, where it says: "__This message contains graphics. If you do not see the graphics, click here to view.__"
+The URL can be fount at the top of the email you receive, where it says: "_This message contains graphics. If you do not see the graphics, click here to view._"
 
 <br>
 <img src="https://raw.githubusercontent.com/B1gG/GartnerEmailParser/main/Screenshot_2021-04-12.png" width="90%">
