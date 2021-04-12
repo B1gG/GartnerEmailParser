@@ -114,10 +114,11 @@ if __name__ == '__main__':
     print('GartnerEmailParser (by BigG):')
     # Define how to use the program
     parser = argparse.ArgumentParser(description="Parser for emails from gartnerwebinars@gartner.com")
-    parser.add_argument("-c", "--config", default='./GartnerEmailParser.json', help="configuration file")
-    parser.add_argument("-b", help="Create the bit.ly links", action="store_true")
-    parser.add_argument("-e", nargs='+', default=[], help="exclude the month (e.g -e January February")
-    parser.add_argument("URL", help="long URL to shrink")
+    parser.add_argument("-c", "--config", default='./GartnerEmailParser.json',
+                        help="configuration file (default: GartnerEmailParser.json)")
+    parser.add_argument("-b", help="create the bit.ly links using your API details", action="store_true")
+    parser.add_argument("-e", nargs='+', default=[], help="exclude specific the months (e.g -e January February)")
+    parser.add_argument("URL", help="url from the gartner email (at the top)")
 
     args = parser.parse_args()
 
