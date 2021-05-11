@@ -8,7 +8,7 @@ import argparse
 import validators
 import json
 import os
-import datetime
+from datetime import datetime, timedelta
 
 
 def request_page(url):
@@ -64,6 +64,7 @@ def main(base_url, bitly, but):
 
     # Save the webinar to order them later
     webinars = []
+    year = datetime.now().strftime('%Y')
 
     # looping over the TR in the webinar's table discating what is not a webinar
     # to use if have no the trending now "/html/body/table[1]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[3]/td/*"
@@ -88,16 +89,31 @@ def main(base_url, bitly, but):
                 link = elem.get('href')
                 # link = request_page(link).url.split('?')[0]
                 # This form looks a bit faster as we don't need to read the page just get the redirection.
-                # The Split is to remove the tracking parameters and just get the link to the registration page.
+                # The Split is to remove the tracking parameters and get just the link to the registration page.
                 link = urllib.request.urlopen(link).url.split('?')[0]
                 if bitly:
                     link = get_bitly_link(link, title)
                 if not any([m in date for m in but]):
+                    eventdatetime = datetime.now()
+                    if 'EDT' in time:
+                        sep = time.find('EDT:') + 4
+                        edt_offset = 0
+                    elif 'AEST' in time:
+                        sep = time.find('AEST:') + 5
+                        edt_offset = 14
+                    elif 'CST' in time:
+                        sep = time.find('CST:') + 4
+                        edt_offset = 12
+                    elif 'SGT' in time:
+                        sep = time.find('SGT:') + 4
+                        edt_offset = 12
+                    edt_time = time[sep:][:11].strip().replace('.', '')
+                    eventdatetime = datetime.strptime(date + ' ' + year + ' ' + edt_time,
+                                                      '%A, %B %d %Y %H:%M %p') + timedelta(hours=edt_offset)
                     webinars.append(
-                        {'date': datetime.datetime.strptime(
-                            date + ' ' + datetime.datetime.now().strftime('%Y') + ' ' + time[-5:],
-                            '%A, %B %d %Y %H:%M'),
-                            'event': f"##### {date.split(',')[1].strip()} : {title}\n{time}\n[Register]({link})"})
+                        {'date': eventdatetime,
+                         'event': f"##### {date.split(',')[1].strip()} : {title}\n{time}\n[Register]({link})"})
+
             if action == 'start' and elem.tag.lower() == 'table':
                 context.skip_subtree()
 
@@ -105,7 +121,7 @@ def main(base_url, bitly, but):
     webinars.sort(key=lambda x: x['date'])
 
     # printing out
-    print('All ready for copy & Paste ...\n\n')
+    print('Events all ready for copy & Paste ...\n\n')
     for webinar in webinars:
         print(webinar['event'], "\n")
 
