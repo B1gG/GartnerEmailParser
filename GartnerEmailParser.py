@@ -98,6 +98,9 @@ def main(base_url, bitly, but):
                     if 'EDT' in time:
                         sep = time.find('EDT:') + 4
                         edt_offset = 0
+                    elif 'EST' in time:
+                        sep = time.find('EST:') + 4
+                        edt_offset = 0
                     elif 'AEST' in time:
                         sep = time.find('AEST:') + 5
                         edt_offset = 14
