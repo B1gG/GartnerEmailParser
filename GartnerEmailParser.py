@@ -76,16 +76,18 @@ def main(base_url, bitly, but):
             continue
         elif e.text != None:
             continue
-
-        context = etree.iterwalk(e, events=("start", "end"))
+        context = etree.iterwalk(e, events=("start",), tag=("strong","a"))
         for action, elem in context:
-            if action == 'start' and (elem.tag.lower() == 'strong' and elem.text != None):
+            if elem.text == None:
+                continue
+            if (elem.tag.lower() == 'strong'):
                 date = elem.text.strip()
                 sep = date.find('|')
                 date = elem.text[:sep].strip()
                 time = elem.text[sep+1:].strip()
-            if action == 'start' and elem.tag.lower() == 'a':
+            if (elem.tag == 'a' and elem.text.strip().lower() != 'register'):
                 title = elem.text.strip()
+            if (elem.tag == 'a' and elem.text.strip().lower() == 'register'):
                 link = elem.get('href')
                 # link = request_page(link).url.split('?')[0]
                 # This form looks a bit faster as we don't need to read the page just get the redirection.
@@ -110,21 +112,19 @@ def main(base_url, bitly, but):
                     elif 'SGT' in time:
                         sep = time.find('SGT:') + 4
                         edt_offset = 12
-                    edt_time = time[sep:][:11].strip().replace('.', '')
+                    edt_time = time[sep:][:10].strip(' (').lower().replace('.', '')
                     eventdatetime = datetime.strptime(date + ' ' + year + ' ' + edt_time,
                                                       '%A, %B %d %Y %H:%M %p') + timedelta(hours=edt_offset)
                     webinars.append(
                         {'date': eventdatetime,
                          'event': f"##### {date.split(',')[1].strip()} : {title}\n{time}\n[Register]({link})"})
 
-            if action == 'start' and elem.tag.lower() == 'table':
-                context.skip_subtree()
 
     # sorting by datetime
     webinars.sort(key=lambda x: x['date'])
 
     # printing out
-    print('Events all ready for copy & Paste ...\n\n')
+    print('Events ready for copy & Paste ...\n\n')
     for webinar in webinars:
         print(webinar['event'], "\n")
 
