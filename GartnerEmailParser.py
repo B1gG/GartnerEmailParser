@@ -8,8 +8,8 @@ import argparse
 import validators
 import json
 import os
-from datetime import datetime, timedelta
-
+import re
+from datetime import datetime, timedelta, timezone
 
 def request_page(url):
     headers = {'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -37,7 +37,6 @@ def request_page(url):
         print(e)
     return(page)
 
-
 def get_bitly_link(link, title):
     # bitly connection
 
@@ -64,7 +63,7 @@ def main(base_url, bitly, but):
 
     # Save the webinar to order them later
     webinars = []
-    year = datetime.now().strftime('%Y')
+    year = datetime.now(tz=timezone.utc).strftime('%Y')
 
     # looping over the TR in the webinar's table discating what is not a webinar
     # to use if have no the trending now "/html/body/table[1]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[3]/td/*"
@@ -81,56 +80,70 @@ def main(base_url, bitly, but):
             if elem.text == None:
                 continue
             if (elem.tag.lower() == 'strong'):
-                date = elem.text.strip()
-                sep = date.find('|')
-                date = elem.text[:sep].strip()
-                time = elem.text[sep+1:].strip()
+                times = re.split("\|",elem.text.strip())
+                date = times.pop(0).strip()
             if (elem.tag == 'a' and elem.text.strip().lower() != 'register'):
                 title = elem.text.strip()
             if (elem.tag == 'a' and elem.text.strip().lower() == 'register'):
                 link = elem.get('href')
-                # link = request_page(link).url.split('?')[0]
-                # This form looks a bit faster as we don't need to read the page just get the redirection.
                 # The Split is to remove the tracking parameters and get just the link to the registration page.
                 link = urllib.request.urlopen(link).url.split('?')[0]
                 if bitly:
                     link = get_bitly_link(link, title)
+                #TODO: add here the case insensitivity 
                 if not any([m in date for m in but]):
-                    eventdatetime = datetime.now()
-                    if 'EDT' in time:
-                        sep = time.find('EDT:') + 4
-                        edt_offset = 0
-                    elif 'EST' in time:
-                        sep = time.find('EST:') + 4
-                        edt_offset = 0
-                    elif 'AEST' in time:
-                        sep = time.find('AEST:') + 5
-                        edt_offset = 14
-                    elif 'CST' in time:
-                        sep = time.find('CST:') + 4
-                        edt_offset = 12
-                    elif 'SGT' in time:
-                        sep = time.find('SGT:') + 4
-                        edt_offset = 12
-                    edt_time = time[sep:][:10].strip(' (').lower().replace('.', '')
-                    eventdatetime = datetime.strptime(date + ' ' + year + ' ' + edt_time,
-                                                      '%A, %B %d %Y %H:%M %p') + timedelta(hours=edt_offset)
-                    webinars.append(
-                        {'date': eventdatetime,
-                         'event': f"##### {date.split(',')[1].strip()} : {title}\n{time}\n[Register]({link})"})
-
+                    for time in times:
+                        if   ('EDT' in time) or ('EST' in time):
+                            utc_offset = -5
+                        elif ('GMT' in time):
+                            utc_offset = 0
+                        elif ('BST' in time):
+                            utc_offset = 1
+                        elif ('CST' in time) or ('SGT' in time):
+                            utc_offset = 8
+                        elif ('AEDT' in time) or ('AEST' in time):
+                            utc_offset = 11
+                        try:
+                            time = re.findall("\d{1,2}:\d{2}\s?(?:AM|PM|a\.m\.|p\.m\.)?",time)[0]
+                            utc_time = time.strip().lower().replace('.', '')
+                            break
+                        except Exception as e:
+                            print(f'Error processing: {title}')
+                            print('\t',e)
+                    else:
+                        # Assume EDT
+                        utc_offset = 0
+                        
+                    eventdatetime = datetime.now(tz=timezone.utc)
+                    date_noday = re.split("^[a-zA-Z]+,\s",date)[1]
+                    try:
+                        eventdatetime = datetime.strptime(date_noday + ' ' + year + ' ' + utc_time + ' UTC',
+                                                         '%B %d %Y %H:%M %p %Z') + timedelta(hours=utc_offset)
+                        
+                    except Exception as e:
+                        print(f'Error in: {title}, Date: {date_noday} as: {e}\n')
+                        try:
+                            eventdatetime = datetime.strptime(date_noday + ' ' + year + ' UTC',
+                                                             '%B %d %Y %Z') + timedelta(hours=utc_offset)
+                        except Exception as e:
+                            print(f'Error in: {title}, Date: {date_noday} as: {e}\n')
+                    finally:
+                        webinars.append(
+                            {'date': eventdatetime,
+                            'event': f"{date.split(',')[1].strip()} : **{title}**\n* :(fas fa-user-clock fa-fw): {' / '.join(times)}\n* :(fas fa-user-check fa-fw): [Register]({link})"})
 
     # sorting by datetime
     webinars.sort(key=lambda x: x['date'])
 
     # printing out
-    print('Events ready for copy & Paste ...\n\n')
+    print(f'({len(webinars)}) Events ready for copy & Paste ...\n\n')
     for webinar in webinars:
         print(webinar['event'], "\n")
 
 
 if __name__ == '__main__':
     print('GartnerEmailParser (by BigG):')
+    print('THe URL only need few parameters as: https://app.gartnerformarketers.com/e/es?e=xxx&elqTrackId=yyy&elq=zzz')
     # Define how to use the program
     parser = argparse.ArgumentParser(description="Parser for emails from gartnerwebinars@gartner.com")
     parser.add_argument("-c", "--config", default='./GartnerEmailParser.json',
