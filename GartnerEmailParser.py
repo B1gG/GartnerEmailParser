@@ -70,7 +70,11 @@ def main(base_url, bitly, but):
     # /html/body/table[1]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[3]/td
     # /html/body/table[1]/tbody/tr/td/table/tbody/tr[1]/td/table/tbody/tr[5]
     # /html/body/table[1]/tbody/tr/td/table/tbody/tr[1]/td/table/tbody/tr[5]/td
-    for e in parser.xpath("/html/body/table[1]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/*"):
+    #                      /html/body/table[1]/tbody/tr/td/table/tbody
+    #                      /html/body/table/tbody/tr/td/table[1]/tbody/tr/td/table/tbody
+    #                      /html/body/table[1]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr[5]
+    #                      /html/body/table[1]/tbody/tr/td/table/tbody/tr/td/table/tbody/tr/*
+    for e in parser.xpath("/html/body/table[1]/tbody/tr/td/table/tbody/tr/*"):
         if e.get('class') != 'responsive_padding':
             continue
         elif e.text != None:
